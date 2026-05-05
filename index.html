@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@300;400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -41,8 +41,8 @@ img{max-width:100%;display:block}
 .mono{font-family:"JetBrains Mono",monospace;letter-spacing:0}
 .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--ink-dim)}
 .slash{color:var(--accent);font-family:"Archivo Black",sans-serif}
-@font-face{font-family:"BankGothicMdBT";src:url("BankGothic%20Md%20BT%20Medium.ttf") format("truetype");font-weight:normal;font-style:normal}
-.cy-brand{font-family:"BankGothicMdBT" !important}
+@font-face{font-family:"BankGothicMdBT";src:local("BankGothic Md BT"),local("BankGothicMdBT"),local("Bank Gothic Medium BT"),url("BankGothic%20Md%20BT%20Medium.ttf") format("truetype");font-weight:normal;font-style:normal;font-display:swap}
+.cy-brand{font-family:"BankGothicMdBT","Michroma","Century Gothic",sans-serif !important}
 
 /* ============ CUSTOM CURSOR ============ */
 .cursor{position:fixed;top:0;left:0;width:8px;height:8px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:transform .2s ease, width .3s ease, height .3s ease, background .3s ease}
@@ -102,20 +102,22 @@ img{max-width:100%;display:block}
 }
 
 /* ============ HERO ============ */
-.hero{position:relative;min-height:100vh;padding:140px 40px 60px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--bg)}
+.hero{position:relative;min-height:100vh;padding:96px 40px 50px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--bg)}
 .hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:80px 80px;opacity:.5;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%)}
-.hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;margin-top:34px}
 .hero-tag{display:flex;align-items:center;gap:12px}
 .hero-tag .bar{width:40px;height:1px;background:var(--accent)}
 .hero-meta{text-align:right;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-dim);line-height:1.8;text-transform:uppercase;letter-spacing:.15em}
 .hero-meta strong{color:var(--ink);font-weight:500}
 
-.hero-main{position:relative;z-index:2;margin:auto 0}
+.hero-main{position:relative;z-index:2;margin:clamp(-92px,-7vh,-52px) 0 auto}
 .hero-headline{font-size:clamp(64px,13vw,220px);line-height:.85;letter-spacing:-.045em}
 .hero-headline .line{display:block;overflow:hidden}
 .hero-headline .line span{display:inline-block}
+.hero-headline .cy-brand{font-family:"BankGothicMdBT","Michroma","Century Gothic",sans-serif !important;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
 .hero-headline .italic{font-family:"Fraunces",serif;font-style:italic;font-weight:300;letter-spacing:-.03em}
 .hero-headline .outline{-webkit-text-stroke:2px var(--ink);color:transparent;font-family:"Archivo Black",sans-serif;font-weight:900}
+.hero-headline .hero-brand-word{font-size:.68em;color:#000;-webkit-text-fill-color:#000;-webkit-text-stroke:2px var(--accent)}
 .hero-headline .accent{color:var(--accent)}
 
 .hero-headline .slash-mark{display:inline-block;color:var(--accent);transform:translateY(-.1em)}
@@ -131,7 +133,7 @@ img{max-width:100%;display:block}
 @keyframes scrollDown{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
 @media(max-width:900px){
-  .hero{padding:110px 20px 40px}
+  .hero{padding:88px 20px 40px}
   .hero-top{flex-direction:column;gap:20px}
   .hero-meta{text-align:left}
   .hero-bottom{grid-template-columns:1fr;gap:24px}
@@ -366,7 +368,7 @@ section{position:relative;padding:120px 40px}
 
   <div class="hero-main">
     <h1 class="hero-headline">
-      <span class="line"><span class="accent cy-brand" style="color:#ff3b1f;font-family:'BankGothicMdBT' !important">CorporateYou</span></span>
+      <span class="line"><span class="outline cy-brand hero-brand-word">CorporateYou</span></span>
       <span class="line"><span>Deine <span class="italic">Marke</span>.</span></span>
       <span class="line"><span><span class="slash-mark">//</span> bist bu.</span></span>
     </h1>
