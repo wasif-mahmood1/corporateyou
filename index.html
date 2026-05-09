@@ -1,247 +1,1129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>3D iPhone Rotation</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: #ffffff;
-      font-family: Arial, sans-serif;
-    }
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    #loading {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 100;
-      font-size: 18px;
-      color: #333;
-    }
-    #error {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 100;
-      color: red;
-      font-size: 16px;
-      max-width: 500px;
-      display: none;
-    }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CorporateYou — Textile Solutions for Businesses</title>
+<meta name="description" content="CorporateYou — B2B-Spezialist für Textilveredelung, Corporate Wear und Markentextilien. Siebdruck, Flex, Digital, Stickerei. Karlsruhe." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@300;400;500;600;700&family=Michroma&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+<style>
+:root{
+  --bg:#0b0b0c;
+  --bg-2:#111113;
+  --ink:#f4f0e8;
+  --ink-dim:#a6a29a;
+  --cream:#ede4d3;
+  --paper:#f4eee2;
+  --accent:#ff3b1f;        /* molten print ink */
+  --accent-2:#ffb547;      /* thread gold */
+  --line:rgba(244,240,232,0.12);
+  --line-strong:rgba(244,240,232,0.35);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);font-family:"Inter Tight",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-size:16px;line-height:1.55}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+::selection{background:var(--accent);color:#fff}
+
+.display{font-family:"Fraunces",serif;font-weight:900;letter-spacing:-0.03em;line-height:0.92}
+.display-it{font-family:"Fraunces",serif;font-style:italic;font-weight:400;letter-spacing:-0.02em}
+.mono{font-family:"JetBrains Mono",monospace;letter-spacing:0}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.22em;color:var(--ink-dim)}
+.slash{color:var(--accent);font-family:"Archivo Black",sans-serif}
+@font-face{font-family:"BankGothicMdBT";src:local("BankGothic Md BT"),local("BankGothicMdBT"),local("Bank Gothic Medium BT"),url("BankGothic%20Md%20BT%20Medium.ttf") format("truetype");font-weight:normal;font-style:normal;font-display:swap}
+.cy-brand{font-family:"BankGothicMdBT","Michroma","Century Gothic",sans-serif !important}
+
+/* ============ CUSTOM CURSOR ============ */
+.cursor{position:fixed;top:0;left:0;width:8px;height:8px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:transform .2s ease, width .3s ease, height .3s ease, background .3s ease}
+.cursor.grow{width:64px;height:64px;margin:-28px 0 0 -28px;background:var(--accent-2)}
+@media (max-width:900px){.cursor{display:none}}
+
+/* ============ NOISE OVERLAY ============ */
+.noise{position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E")}
+
+/* ============ LOADER ============ */
+.loader{position:fixed;inset:0;background:var(--bg);z-index:10000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.loader-inner{display:flex;align-items:baseline;gap:8px}
+.loader-count{font-family:"Archivo Black",sans-serif;font-size:clamp(80px,15vw,200px);color:var(--ink);line-height:1}
+.loader-label{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.2em}
+.loader-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--accent);width:0%}
+
+/* ============ NAV ============ */
+.nav{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  z-index:500;
+  width:calc(100% - 40px);max-width:1360px;
+  padding:14px 14px 14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  background:rgba(11,11,12,0);
+  border:1px solid transparent;
+  border-radius:100px;
+  backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);
+  transition:background .45s ease, border-color .45s ease, backdrop-filter .45s ease, top .45s ease, padding .45s ease, box-shadow .45s ease;
+}
+.nav.scrolled{
+  top:14px;
+  padding:10px 10px 10px 22px;
+  background:rgba(11,11,12,0.72);
+  border-color:rgba(244,240,232,0.09);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 10px 40px -10px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.03) inset;
+}
+.nav-logo{font-family:"Archivo Black",sans-serif;font-size:17px;letter-spacing:-0.02em;color:var(--ink);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-logo img{filter:brightness(0) saturate(100%) invert(32%) sepia(99%) saturate(3481%) hue-rotate(351deg) brightness(105%) contrast(106%)}
+.nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 2s infinite;box-shadow:0 0 12px rgba(255,59,31,.6)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}}
+.nav-menu{display:flex;gap:28px;align-items:center}
+.nav-menu a{font-family:"JetBrains Mono",monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink);position:relative;padding:6px 2px;opacity:.82;transition:opacity .3s ease}
+.nav-menu a:hover{opacity:1}
+.nav-menu a::after{content:"";position:absolute;left:50%;bottom:0;width:0;height:1px;background:var(--accent);transition:width .4s ease, left .4s ease}
+.nav-menu a:hover::after{width:100%;left:0}
+.nav-cta{font-family:"JetBrains Mono",monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.18em;padding:12px 20px;border-radius:100px;transition:all .35s ease;color:#fff;background:var(--accent);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;box-shadow:0 6px 18px -4px rgba(255,59,31,.5)}
+.nav-cta:hover{background:#fff;color:#000;box-shadow:0 6px 18px -4px rgba(255,255,255,.3)}
+.nav-cta .arr{display:inline-block;transition:transform .35s ease}
+.nav-cta:hover .arr{transform:translateX(4px)}
+@media(max-width:900px){
+  .nav{top:12px;width:calc(100% - 20px);padding:10px 10px 10px 18px}
+  .nav.scrolled{top:8px}
+  .nav-menu{display:none}
+  .nav-logo{font-size:15px}
+  .nav-cta{padding:10px 16px;font-size:10.5px;letter-spacing:.15em}
+}
+
+/* ============ HERO ============ */
+.hero{position:relative;min-height:100vh;padding:96px 40px 50px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--bg)}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:80px 80px;opacity:.5;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;margin-top:34px}
+.hero-tag{display:flex;align-items:center;gap:12px}
+.hero-tag .bar{width:40px;height:1px;background:var(--accent)}
+.hero-meta{text-align:right;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-dim);line-height:1.8;text-transform:uppercase;letter-spacing:.15em}
+.hero-meta strong{color:var(--ink);font-weight:500}
+
+.hero-main{position:relative;z-index:2;margin:clamp(-92px,-7vh,-52px) 0 auto}
+.hero-headline{font-size:clamp(64px,13vw,220px);line-height:.85;letter-spacing:-.045em}
+.hero-headline .line{display:block;overflow:hidden}
+.hero-headline .line span{display:inline-block}
+.hero-headline .cy-brand{font-family:"BankGothicMdBT","Michroma","Century Gothic",sans-serif !important;font-weight:400;text-transform:uppercase;letter-spacing:.04em}
+.hero-headline .italic{font-family:"Fraunces",serif;font-style:italic;font-weight:300;letter-spacing:-.03em}
+.hero-headline .outline{-webkit-text-stroke:2px var(--ink);color:transparent;font-family:"Archivo Black",sans-serif;font-weight:900}
+.hero-headline .hero-brand-word{font-size:.68em;color:#000;-webkit-text-fill-color:#000;-webkit-text-stroke:2px var(--accent)}
+.hero-headline .accent{color:var(--accent)}
+
+.hero-headline .slash-mark{display:inline-block;color:var(--accent);transform:translateY(-.1em)}
+
+.hero-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;align-items:end;position:relative;z-index:2;padding-top:40px;border-top:1px solid var(--line)}
+.hero-bottom-item h4{font-family:"JetBrains Mono",monospace;font-size:11px;text-transform:uppercase;color:var(--ink-dim);letter-spacing:.2em;margin-bottom:12px}
+.hero-bottom-item p{font-family:"Fraunces",serif;font-size:18px;line-height:1.4;max-width:320px}
+.hero-bottom-item .big{font-family:"Archivo Black",sans-serif;font-size:48px;line-height:1;color:var(--ink)}
+.hero-bottom-item .big sup{font-size:18px;vertical-align:super;color:var(--accent);margin-left:4px}
+
+.hero-scroll{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink-dim);letter-spacing:.3em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px}
+.hero-scroll .line-v{width:1px;height:40px;background:linear-gradient(var(--accent),transparent);animation:scrollDown 2s infinite}
+@keyframes scrollDown{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+@media(max-width:900px){
+  .hero{padding:88px 20px 40px;min-height:auto}
+  .hero-top{flex-direction:column;gap:18px;margin-top:0}
+  .hero-meta{text-align:left}
+  .hero-bottom{grid-template-columns:1fr;gap:24px;padding-top:36px}
+  .hero-main{margin:40px 0}
+  .hero-headline{font-size:clamp(64px,14vw,118px);line-height:.9;letter-spacing:-.035em}
+  .hero-headline .hero-brand-word{font-size:.55em;-webkit-text-stroke:1.5px var(--accent);letter-spacing:0}
+  .hero-headline .italic{letter-spacing:-.02em}
+  .hero-scroll{display:none}
+}
+@media(max-width:480px){
+  .hero{padding:84px 16px 32px}
+  .hero-headline{font-size:clamp(54px,14.5vw,76px);line-height:.92;letter-spacing:-.03em}
+  .hero-headline .hero-brand-word{font-size:.5em;-webkit-text-stroke:1.2px var(--accent)}
+  .hero-bottom-item .big{font-size:40px}
+  .hero-bottom-item p{font-size:16px}
+  .hero-meta{font-size:10px;letter-spacing:.12em}
+}
+
+/* ============ MARQUEE TICKER ============ */
+.ticker{background:var(--accent);color:#fff;overflow:hidden;padding:22px 0;border-top:1px solid #000;border-bottom:1px solid #000}
+.ticker-track{display:flex;white-space:nowrap;animation:tick 30s linear infinite;gap:60px}
+.ticker span{font-family:"Archivo Black",sans-serif;font-size:clamp(28px,4vw,56px);text-transform:uppercase;letter-spacing:-.02em;display:inline-flex;align-items:center;gap:60px}
+.ticker span::after{content:"✕";color:#000;font-size:.7em;display:inline-block;transform:translateY(-2px)}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ============ SECTION DEFAULT ============ */
+section{position:relative;padding:120px 40px}
+@media(max-width:900px){section{padding:80px 20px}}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;margin-bottom:80px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.section-head .num{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.2em}
+.section-head .lbl{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.25em;margin-top:6px}
+.section-head h2{font-family:"Fraunces",serif;font-weight:400;font-size:clamp(40px,6vw,88px);line-height:.95;letter-spacing:-.03em;max-width:70%}
+.section-head h2 em{font-style:italic;color:var(--accent);font-weight:300}
+@media(max-width:900px){
+  .section-head{flex-direction:column;margin-bottom:50px}
+  .section-head h2{max-width:100%;font-size:42px}
+}
+
+/* ============ ABOUT / STORY ============ */
+.about{background:var(--bg);position:relative}
+.about-grid{display:grid;grid-template-columns:1.35fr .85fr;gap:80px;align-items:start}
+.about-visual{position:sticky;top:120px;aspect-ratio:1/1.05;max-height:820px;width:100%;background:linear-gradient(135deg,#1a1a1c,#0b0b0c);border:1px solid var(--line);border-radius:4px;overflow:visible;display:flex;align-items:center;justify-content:center}
+.about-visual svg{width:48%;height:auto;opacity:.95;position:relative;z-index:3;filter:drop-shadow(0 6px 20px rgba(255,59,31,.18))}
+.about-visual .av-corner{position:absolute;width:22%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line-strong);border-radius:6px;z-index:2;box-shadow:0 18px 40px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,59,31,.08);filter:grayscale(15%) contrast(1.05) brightness(.95);transition:filter .5s ease, box-shadow .5s ease}
+.about-visual .av-corner::after{content:""}
+.about-visual .av-corner:hover{filter:grayscale(0%) contrast(1.1) brightness(1);box-shadow:0 22px 50px -10px rgba(0,0,0,.8), 0 0 0 1px var(--accent)}
+.about-visual .av-corner.tl{top:24px;left:24px;animation:floatA 7s ease-in-out infinite;transform-origin:center}
+.about-visual .av-corner.tr{top:24px;right:24px;animation:floatB 8s ease-in-out infinite;animation-delay:-2s}
+.about-visual .av-corner.bl{bottom:24px;left:24px;animation:floatB 7.5s ease-in-out infinite;animation-delay:-1s}
+.about-visual .av-corner.br{bottom:24px;right:24px;animation:floatA 8.5s ease-in-out infinite;animation-delay:-3s}
+.about-visual .av-corner.tl{transform:rotate(-5deg)}
+.about-visual .av-corner.tr{transform:rotate(4deg)}
+.about-visual .av-corner.bl{transform:rotate(3deg)}
+.about-visual .av-corner.br{transform:rotate(-4deg)}
+@keyframes floatA{0%,100%{transform:translateY(0) rotate(var(--rot,-5deg))}50%{transform:translateY(-10px) rotate(calc(var(--rot,-5deg) + 1.5deg))}}
+@keyframes floatB{0%,100%{transform:translateY(0) rotate(var(--rot,4deg))}50%{transform:translateY(-12px) rotate(calc(var(--rot,4deg) - 1.5deg))}}
+.about-visual .av-corner.tl{--rot:-5deg}
+.about-visual .av-corner.tr{--rot:4deg}
+.about-visual .av-corner.bl{--rot:3deg}
+.about-visual .av-corner.br{--rot:-4deg}
+.about-visual .av-corner:hover{animation-play-state:paused}
+.about-visual .av-tag{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--ink);padding:8px 14px;background:rgba(11,11,12,.78);backdrop-filter:blur(6px);border:1px solid var(--line-strong);border-radius:100px;white-space:nowrap;display:none}
+.about-visual .av-tag::before{content:"\25CF";color:var(--accent);margin-right:8px;font-size:.7em}
+.about-content{display:flex;flex-direction:column;gap:40px}
+.about-lead{font-family:"Fraunces",serif;font-size:clamp(24px,2.4vw,34px);line-height:1.3;font-weight:300;letter-spacing:-.01em}
+.about-lead .cy-brand{color:var(--accent)}
+.about-lead strong{font-weight:600;color:var(--accent)}
+.about-body{color:var(--ink-dim);font-size:17px;line-height:1.75;max-width:540px}
+.about-body p+p{margin-top:18px}
+
+.mv-split{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);margin-top:60px}
+.mv-card{background:var(--bg);padding:36px;position:relative}
+.mv-card h4{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.25em;margin-bottom:20px}
+.mv-card p{font-family:"Fraunces",serif;font-size:20px;line-height:1.4;letter-spacing:-.01em}
+.mv-card::before{content:"";position:absolute;top:0;left:0;width:40px;height:1px;background:var(--accent)}
+@media(max-width:900px){
+  .about-grid{grid-template-columns:1fr;gap:40px}
+  .about-visual{position:relative;top:0;aspect-ratio:1/1;max-height:none}
+  .mv-split{grid-template-columns:1fr}
+}
+
+/* ============ SERVICES / LEISTUNGEN ============ */
+.services{background:var(--paper);color:#0b0b0c;position:relative;overflow:hidden}
+.services .section-head{border-color:rgba(0,0,0,.15)}
+.services .section-head .lbl{color:#555}
+.services .section-head h2 em{color:var(--accent)}
+.services-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:0}
+.service-card{grid-column:span 3;padding:34px 24px;border-top:1px solid rgba(0,0,0,.15);border-right:1px solid rgba(0,0,0,.15);position:relative;overflow:hidden;cursor:pointer;transition:background .4s ease}
+.service-card:nth-child(4n){border-right:none}
+.service-card:nth-last-child(-n+2){border-bottom:1px solid rgba(0,0,0,.15)}
+.service-card .num{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.2em}
+.service-card h3{font-family:"Fraunces",serif;font-size:32px;font-weight:500;letter-spacing:-.025em;margin:18px 0 10px;line-height:1.05}
+.service-card p{color:#333;font-size:15px;line-height:1.6;max-width:320px}
+.service-card .sv-icon{position:absolute;bottom:28px;right:24px;width:48px;height:48px;transition:transform .6s cubic-bezier(.7,0,.2,1)}
+.service-card:hover{background:#0b0b0c;color:var(--ink)}
+.service-card:hover p{color:var(--ink-dim)}
+.service-card:hover .sv-icon{transform:translate(-10px,-10px) rotate(45deg)}
+.service-card:hover .sv-icon path,.service-card:hover .sv-icon circle,.service-card:hover .sv-icon rect{stroke:var(--accent)}
+.service-card::before{content:"";position:absolute;top:0;left:0;width:0;height:3px;background:var(--accent);transition:width .5s ease}
+.service-card:hover::before{width:100%}
+@media(max-width:1000px){.service-card{grid-column:span 6}.service-card:nth-child(4n){border-right:1px solid rgba(0,0,0,.15)}.service-card:nth-child(2n){border-right:none}}
+@media(max-width:600px){.service-card{grid-column:span 12;border-right:none!important}}
+
+/* ============ TECHNIQUES / VEREDELUNG ============ */
+.techniques{background:var(--bg-2);position:relative}
+.tech-intro{font-family:"Fraunces",serif;font-size:clamp(22px,2vw,28px);line-height:1.4;max-width:700px;color:var(--ink);margin-bottom:60px;font-weight:300}
+.tech-list{border-top:1px solid var(--line)}
+.tech-row{display:grid;grid-template-columns:80px 1fr 2fr 80px;gap:40px;padding:40px 0;border-bottom:1px solid var(--line);align-items:center;cursor:pointer;position:relative;transition:padding .4s ease}
+.tech-row:hover{padding-left:24px}
+.tech-row::after{content:"";position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--accent) 0%,transparent 100%);opacity:.08;transition:width .4s ease;z-index:0}
+.tech-row:hover::after{width:100%}
+.tech-row > *{position:relative;z-index:1}
+.tech-row .num{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--accent);letter-spacing:.1em}
+.tech-row h3{font-family:"Archivo Black",sans-serif;font-size:clamp(28px,4vw,52px);letter-spacing:-.02em;text-transform:uppercase;line-height:1}
+.tech-row p{color:var(--ink-dim);font-size:15px;line-height:1.6;max-width:480px}
+.tech-row .arrow{font-size:28px;color:var(--ink-dim);transition:transform .4s ease, color .4s ease;text-align:right}
+.tech-row:hover .arrow{transform:translateX(10px);color:var(--accent)}
+.tech-row:hover h3{color:var(--accent)}
+@media(max-width:900px){
+  .tech-row{grid-template-columns:50px 1fr;grid-template-rows:auto auto;gap:12px;padding:28px 0}
+  .tech-row p{grid-column:2;max-width:100%}
+  .tech-row .arrow{display:none}
+}
+
+/* ============ CAPACITY / STATS ============ */
+.capacity{background:var(--bg);text-align:center;padding:160px 40px}
+.capacity-eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.3em;text-transform:uppercase;margin-bottom:40px}
+.capacity-huge{font-family:"Archivo Black",sans-serif;font-size:clamp(120px,26vw,420px);line-height:.85;letter-spacing:-.05em;position:relative;display:inline-block}
+.capacity-huge .unit{font-family:"Fraunces",serif;font-style:italic;font-weight:300;font-size:.2em;color:var(--accent);position:absolute;top:20%;right:-80px;letter-spacing:-.02em}
+.capacity-sub{font-family:"Fraunces",serif;font-size:clamp(22px,2.4vw,32px);font-weight:300;line-height:1.4;max-width:700px;margin:40px auto 0;color:var(--ink)}
+.capacity-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);margin-top:80px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cap-stat{background:var(--bg);padding:40px 20px}
+.cap-stat .n{font-family:"Archivo Black",sans-serif;font-size:48px;color:var(--accent);line-height:1}
+.cap-stat .l{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-dim);letter-spacing:.2em;text-transform:uppercase;margin-top:10px}
+@media(max-width:900px){
+  .capacity-huge .unit{position:static;display:block;margin-top:10px}
+  .capacity-stats{grid-template-columns:1fr}
+}
+
+/* ============ AUDIENCE / ZIELGRUPPE ============ */
+.audience{background:var(--cream);color:#0b0b0c;overflow:hidden}
+.audience .section-head{border-color:rgba(0,0,0,.15)}
+.audience .section-head .lbl{color:#555}
+.audience .section-head h2 em{color:var(--accent)}
+.audience-intro{font-family:"Fraunces",serif;font-size:clamp(22px,2vw,28px);line-height:1.4;max-width:700px;font-weight:300;margin-bottom:60px;color:#333}
+.audience-marquee{display:flex;flex-direction:column;gap:30px;margin:0 -40px}
+.am-line{display:flex;white-space:nowrap;gap:40px;align-items:center}
+.am-line.r1{animation:slide 50s linear infinite}
+.am-line.r2{animation:slide-r 60s linear infinite}
+.am-line.r3{animation:slide 55s linear infinite}
+@keyframes slide{to{transform:translateX(-50%)}}
+@keyframes slide-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.am-line span{font-family:"Fraunces",serif;font-style:italic;font-weight:400;font-size:clamp(42px,6vw,88px);letter-spacing:-.02em;line-height:1;display:inline-flex;align-items:center;gap:40px;color:#0b0b0c}
+.am-line span::after{content:"◆";color:var(--accent);font-size:.5em;font-style:normal}
+.am-line.alt span{color:var(--accent);-webkit-text-stroke:0;font-weight:500}
+.am-line.outline span{color:transparent;-webkit-text-stroke:1.5px #0b0b0c}
+
+/* ============ USP ============ */
+.usp{background:var(--bg);padding:140px 40px}
+.usp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--line)}
+.usp-card{background:var(--bg);padding:48px 40px;position:relative;overflow:hidden;min-height:320px;display:flex;flex-direction:column;justify-content:space-between}
+.usp-card .num{font-family:"Archivo Black",sans-serif;font-size:96px;color:transparent;-webkit-text-stroke:1px var(--line-strong);line-height:1;letter-spacing:-.05em}
+.usp-card h3{font-family:"Fraunces",serif;font-size:32px;font-weight:500;letter-spacing:-.02em;margin-bottom:12px;line-height:1.1}
+.usp-card p{color:var(--ink-dim);font-size:15px;line-height:1.7;max-width:440px}
+.usp-card::before{content:"";position:absolute;top:0;right:0;width:4px;height:0;background:var(--accent);transition:height .6s cubic-bezier(.7,0,.2,1)}
+.usp-card:hover::before{height:100%}
+.usp-card:hover .num{-webkit-text-stroke:1px var(--accent);color:var(--accent)}
+@media(max-width:800px){
+  .usp{padding:100px 20px}
+  .usp-grid{grid-template-columns:1fr}
+  .usp-card{padding:36px 24px;min-height:auto;gap:24px}
+  .usp-card .num{font-size:72px}
+  .usp-card h3{font-size:26px}
+  .usp-card p{max-width:100%}
+  .usp-card[style*="span 2"]{grid-column:auto !important}
+}
+@media(max-width:480px){
+  .usp{padding:80px 16px}
+  .usp-card{padding:32px 20px;gap:20px}
+  .usp-card .num{font-size:60px}
+  .usp-card h3{font-size:22px}
+  .usp-card p{font-size:14px;line-height:1.6}
+}
+
+/* ============ BRAND POSITIONING ============ */
+.positioning{background:var(--paper);color:#0b0b0c;text-align:center;padding:160px 40px;overflow:hidden}
+.pos-big{font-family:"Fraunces",serif;font-size:clamp(50px,10vw,160px);line-height:.95;letter-spacing:-.04em;font-weight:400}
+.pos-big .line{display:block}
+.pos-big .word{display:inline-block;margin:0 .15em}
+.pos-big .italic{font-style:italic;font-weight:300}
+.pos-big .circled{position:relative;display:inline-block;color:var(--accent);font-weight:700}
+.pos-big .circled svg{position:absolute;top:-8%;left:-8%;width:116%;height:116%;pointer-events:none}
+.pos-values{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:80px;border-top:1px solid rgba(0,0,0,.15);padding-top:40px}
+.pos-val{font-family:"Archivo Black",sans-serif;font-size:clamp(24px,3vw,42px);text-transform:uppercase;letter-spacing:-.02em}
+.pos-val:nth-child(2){color:var(--accent)}
+@media(max-width:700px){.pos-values{grid-template-columns:1fr}}
+
+/* ============ CTA ============ */
+.cta{background:var(--accent);color:#fff;padding:140px 40px;position:relative;overflow:hidden}
+.cta::before{content:"CORPORATEYOU CORPORATEYOU CORPORATEYOU";position:absolute;top:0;left:-5%;width:110%;font-family:"Archivo Black",sans-serif;font-size:320px;line-height:1;color:rgba(255,255,255,.06);white-space:nowrap;pointer-events:none;overflow:hidden}
+.cta-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:center}
+.cta h2{font-family:"Fraunces",serif;font-size:clamp(48px,7vw,110px);line-height:.95;letter-spacing:-.035em;font-weight:400}
+.cta h2 em{font-style:italic;font-weight:300}
+.cta-right{display:flex;flex-direction:column;gap:20px}
+.cta-right p{font-size:17px;line-height:1.6;opacity:.9;max-width:420px}
+.cta-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 32px;background:#000;color:#fff;border-radius:100px;font-family:"JetBrains Mono",monospace;font-size:13px;text-transform:uppercase;letter-spacing:.2em;transition:transform .3s ease, background .3s ease;max-width:420px}
+.cta-btn:hover{background:#fff;color:#000;transform:translateY(-4px)}
+.cta-btn .arrow{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;transition:background .3s ease}
+.cta-btn:hover .arrow{background:#000;color:#fff}
+@media(max-width:800px){
+  .cta-inner{grid-template-columns:1fr}
+  .cta::before{font-size:120px}
+}
+
+/* ============ FOOTER ============ */
+.footer{background:#000;padding:80px 40px 40px;border-top:1px solid #1a1a1c}
+.footer-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:30px;border-bottom:1px solid #1a1a1c}
+.footer-brand h3{font-family:"Archivo Black",sans-serif;font-size:32px;letter-spacing:-.02em;margin-bottom:16px}
+.footer-logo{height:40px;width:auto;display:block;margin-bottom:4px;filter:brightness(0) saturate(100%) invert(32%) sepia(99%) saturate(3481%) hue-rotate(351deg) brightness(105%) contrast(106%)}
+.footer-brand p{color:var(--ink-dim);max-width:360px;line-height:1.7;font-size:15px;margin-left:10px}
+.footer-col h5{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.2em;margin-bottom:20px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{color:var(--ink-dim);font-size:14px;transition:color .3s ease}
+.footer-col a:hover{color:var(--ink)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:30px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.2em}
+.footer-bottom .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:8px;animation:pulse 2s infinite}
+@media(max-width:800px){
+  .footer-main{grid-template-columns:1fr 1fr;gap:30px}
+  .footer-bottom{flex-direction:column;gap:20px;text-align:center}
+}
+
+/* ============ REVEAL ANIMATIONS ============ */
+.reveal-line{overflow:hidden}
+.reveal-line > *{display:inline-block;transform:translateY(110%)}
+.fade-up{opacity:0;transform:translateY(40px)}
+.split-char{display:inline-block;transform:translateY(110%)}
+
+</style>
 </head>
 <body>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <p>Loading 3D Model...</p>
+<div class="noise"></div>
+<div class="cursor" id="cursor"></div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <span class="loader-count" id="loader-count">0</span>
+    <span class="loader-label">% Veredelung</span>
+  </div>
+  <div class="loader-bar" id="loader-bar"></div>
 </div>
-<div id="error"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#" class="nav-logo"><img src="https://webtestingenvironment.site/Corporateyou%20white-01.png" alt="CorporateYou" style="height:32px;width:auto;display:block"></a>
+  <div class="nav-menu">
+    <a href="#story">Story</a>
+    <a href="#leistungen">Leistungen</a>
+    <a href="#veredelung">Veredelung</a>
+    <a href="#kapazitaet">Kapazität</a>
+    <a href="#kontakt">Kontakt</a>
+  </div>
+  <a href="#kontakt" class="nav-cta">Angebot anfragen <span class="arr">→</span></a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-top">
+    <div class="hero-tag eyebrow"><span class="bar"></span> <span class="slash">//</span> WEARABLE Solutions for Businesses</div>
+    <div class="hero-meta">
+      <div><strong>BADEN</strong> — Germany</div>
+      <div>Est. B2B Specialists</div>
+     <div>WEARABLE Solutions  </div>
+
+      <div id="clock">—</div>
+    </div>
+  </div>
+
+  <div class="hero-main">
+    <h1 class="hero-headline">
+      <span class="line"><span class="outline cy-brand hero-brand-word">CorporateYou</span></span>
+      <span class="line"><span>Deine <span class="italic">Marke</span>.</span></span>
+      <span class="line"><span><span class="slash-mark">//</span> bist bu.</span></span>
+    </h1>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-bottom-item">
+      <h4>// Was wir tun</h4>
+      <p>Siebdruck, Flex, Digital & Stickerei — alle Veredelungsverfahren unter einem Dach.</p>
+    </div>
+    <div class="hero-bottom-item">
+      <h4>// Kapazität</h4>
+      <div class="big" data-count="400">400<sup>+</sup></div>
+      <p class="mono" style="font-size:12px;color:var(--ink-dim);margin-top:6px">veredelte Textilien / Tag</p>
+    </div>
+    <div class="hero-bottom-item">
+      <h4>// Für wen</h4>
+      <p>Ausschließlich B2B — Industrie, Handwerk, Events, Marken & Sportvereine.</p>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <span class="line-v"></span>
+  </div>
+</header>
+
+<!-- MARQUEE TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span>Flexdruck</span><span>Stickerei</span><span>DTF</span><span>DTG</span><span>Sublimation</span><span>Latex</span>
+    <span>Flexdruck</span><span>Stickerei</span><span>DTF</span><span>DTG</span><span>Sublimation</span><span>Latex</span>
+  </div>
+</div>
+
+<!-- ABOUT / STORY -->
+<section class="about" id="story">
+  <div class="section-head">
+    <div>
+      <div class="num">01 — Unternehmensidee</div>
+      <div class="lbl">Die Story</div>
+    </div>
+    <h2 class="reveal"><em>Spezialisierung</em> statt Gemischtwarenladen.<br/>B2B — konsequent.</h2>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-visual">
+      <img class="av-corner tl" src="images/stiff.png" alt="Production detail" loading="lazy">
+      <img class="av-corner tr" src="images/7be68d7e-0701-4058-87f3-8227102139e9.png" alt="Flexdruck detail" loading="lazy">
+      <img class="av-corner bl" src="images/staff.png" alt="Stickerei detail" loading="lazy">
+      <img class="av-corner br" src="images/stuff.png" alt="Weiterverarbeitung detail" loading="lazy">
+      <!-- Animated thread/stitch SVG -->
+      <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="thread" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff3b1f"/>
+            <stop offset="100%" stop-color="#ffb547"/>
+          </linearGradient>
+        </defs>
+        <!-- Fabric grid -->
+        <g stroke="rgba(244,240,232,0.08)" stroke-width="1" fill="none">
+          <line x1="0" y1="60" x2="400" y2="60"/>
+          <line x1="0" y1="120" x2="400" y2="120"/>
+          <line x1="0" y1="180" x2="400" y2="180"/>
+          <line x1="0" y1="240" x2="400" y2="240"/>
+          <line x1="0" y1="300" x2="400" y2="300"/>
+          <line x1="0" y1="360" x2="400" y2="360"/>
+          <line x1="0" y1="420" x2="400" y2="420"/>
+          <line x1="60" y1="0" x2="60" y2="500"/>
+          <line x1="120" y1="0" x2="120" y2="500"/>
+          <line x1="180" y1="0" x2="180" y2="500"/>
+          <line x1="240" y1="0" x2="240" y2="500"/>
+          <line x1="300" y1="0" x2="300" y2="500"/>
+          <line x1="340" y1="0" x2="340" y2="500"/>
+        </g>
+        <!-- Big CY letters -->
+        <text x="60" y="250" font-family="Archivo Black" font-size="200" fill="url(#thread)" opacity="0.85">CY</text>
+        <!-- Stitch line -->
+        <path id="stitch-path" d="M20 430 Q100 380 180 430 T340 430 T380 430" stroke="#ff3b1f" stroke-width="2" stroke-dasharray="8 6" fill="none"/>
+        <!-- Circles / eyelets -->
+        <circle cx="50" cy="60" r="4" fill="#ff3b1f"/>
+        <circle cx="350" cy="60" r="4" fill="#ff3b1f"/>
+        <circle cx="50" cy="440" r="4" fill="#ff3b1f"/>
+        <circle cx="350" cy="440" r="4" fill="#ff3b1f"/>
+        <!-- Needle -->
+        <g transform="translate(200 90) rotate(-20)">
+          <rect x="-1" y="0" width="2" height="80" fill="#ede4d3"/>
+          <circle cx="0" cy="80" r="3" fill="#ff3b1f"/>
+          <ellipse cx="0" cy="-4" rx="3" ry="8" fill="none" stroke="#ede4d3" stroke-width="1"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="about-content">
+      <p class="about-lead reveal"><span class="cy-brand" style="color:#ff3b1f">CorporateYou</span> ist ein spezialisiertes B2B-Unternehmen für die <strong>Herstellung, Veredelung und Weiterverarbeitung</strong> von Textilien für Firmenkunden.</p>
+      <div class="about-body">
+        <p>Wir bieten eine umfassende Lösung für Corporate Wear, Arbeitskleidung, Eventbekleidung und Werbetextilien — mit Fokus auf hochwertiger Individualisierung durch modernste Veredelungsverfahren.</p>
+        <p><span class="cy-brand" style="color:#ff3b1f">CorporateYou</span> richtet sich ausschließlich an Geschäftskunden und bietet Unternehmen die Möglichkeit, ihre Marke professionell und einheitlich auf Textilien zu präsentieren.</p>
+      </div>
+
+      <!-- MISSION / VISION -->
+      <div class="mv-split">
+        <div class="mv-card">
+          <h4>// Mission</h4>
+          <p>Unternehmen eine hochwertige, langlebige und individuell gestaltete textile Markenpräsenz ermöglichen.</p>
+        </div>
+        <div class="mv-card">
+          <h4>// Vision</h4>
+          <p>Führender B2B-Partner für textile Veredelung und Corporate Wear in Europa — mit Fokus auf Qualität, Flexibilität und technologische Vielfalt.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="leistungen">
+  <div class="section-head">
+    <div>
+      <div class="num">02 — Leistungsportfolio</div>
+      <div class="lbl">Was wir anbieten</div>
+    </div>
+    <h2 class="reveal">Full-Service für textile <em>Individualisierung.</em></h2>
+  </div>
+
+  <div class="services-grid">
+   
+    <div class="service-card">
+      <div class="num">// 01</div>
+      <h3>Flexdruck</h3>
+      <p>Präzise Logos und Schriftzüge. Ideal für Arbeitskleidung und Sporttextilien.</p>
+      <svg class="sv-icon" viewBox="0 0 56 56" fill="none" stroke="#0b0b0c" stroke-width="1.5"><path d="M10 40 L22 20 L34 32 L46 12"/><circle cx="10" cy="40" r="2"/><circle cx="22" cy="20" r="2"/><circle cx="34" cy="32" r="2"/><circle cx="46" cy="12" r="2"/></svg>
+    </div>
+   
+    <div class="service-card">
+      <div class="num">// 02</div>
+      <h3>Stickerei <span class="mono" style="font-size:10px;color:var(--accent);display:block;margin-top:4px">— Inhouse</span></h3>
+      <p>Besonders robust und langlebig. Ideal für Berufsbekleidung — hochwertige Markenwirkung.</p>
+      <svg class="sv-icon" viewBox="0 0 56 56" fill="none" stroke="#0b0b0c" stroke-width="1.5"><path d="M12 28 Q20 20 28 28 T44 28" stroke-dasharray="3 3"/><circle cx="12" cy="28" r="2" fill="#0b0b0c"/><circle cx="44" cy="28" r="2" fill="#0b0b0c"/></svg>
+    </div>
+    <div class="service-card">
+      <div class="num">// 03</div>
+      <h3>Weiterverarbeitung</h3>
+      <p>Etikettierung, Individualverpackung, Kommissionierung und Konfektionierung.</p>
+      <svg class="sv-icon" viewBox="0 0 56 56" fill="none" stroke="#0b0b0c" stroke-width="1.5"><rect x="12" y="14" width="32" height="32" rx="2"/><path d="M12 22 L44 22"/><path d="M24 14 L24 22"/><path d="M32 30 L32 38"/></svg>
+    </div>
+    <div class="service-card">
+      <div class="num">// 04</div>
+      <h3>Lohnveredelung</h3>
+      <p>Kapazitätspartner für andere Textilunternehmen, Druckereien & Werbemittelhändler.</p>
+      <svg class="sv-icon" viewBox="0 0 56 56" fill="none" stroke="#0b0b0c" stroke-width="1.5"><path d="M14 28 L24 38 L42 18"/><circle cx="28" cy="28" r="16"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNIQUES -->
+<section class="techniques" id="veredelung">
+  <div class="section-head">
+    <div>
+      <div class="num">03 — Technologie</div>
+      <div class="lbl">Veredelungsverfahren</div>
+    </div>
+    <h2 class="reveal"><em>Alles aus</em> einer Hand.</h2>
+  </div>
+  <p class="tech-intro">Alle gängigen Textilveredelungsverfahren — intern produziert, zentral gesteuert. Von kleinen Prototyp-Serien bis zu Großaufträgen mit 400 Teilen pro Tag.</p>
+
+  <div class="tech-list">
+    <div class="tech-row">
+      <span class="num">/01</span>
+      <h3>DTF</h3>
+      <p>Direct-to-Film. Perfekt für komplexe, vielfarbige Motive auf unterschiedlichen Textilarten.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/02</span>
+      <h3>DTG</h3>
+      <p>Direct-to-Garment — fotorealistische Prints direkt auf das Textil.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/03</span>
+      <h3>Flex</h3>
+      <p>Präzise Logos & Schriftzüge — scharf, langlebig, perfekt für Sport & Workwear.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/04</span>
+      <h3>Flock</h3>
+      <p>Samtig-haptische Oberfläche mit Premium-Wirkung und hohem Wiedererkennungswert.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/05</span>
+      <h3>Stick</h3>
+      <p>Inhouse-Stickerei. Robust, professionell, hochwertig — der Goldstandard für Berufsbekleidung.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/06</span>
+      <h3>Sublimation</h3>
+      <p>Farben, die ins Material einziehen — fühlbar nicht aufgetragen, sondern Teil des Stoffs.</p>
+      <span class="arrow">→</span>
+    </div>
+    <div class="tech-row">
+      <span class="num">/07</span>
+      <h3>Latex</h3>
+      <p>Hochpigmentiert und wetterfest — ideal für anspruchsvolle Outdoor- und Event-Textilien.</p>
+      <span class="arrow">→</span>
+    </div>
+  </div>
+</section>
+
+<!-- CAPACITY / STATS -->
+<section class="capacity" id="kapazitaet">
+  <div class="capacity-eyebrow">// 04 — Produktionskapazität</div>
+  <div class="capacity-huge">
+    <span id="cap-num">400</span>
+    <span class="unit">Teile<br/>pro Tag</span>
+  </div>
+  <p class="capacity-sub">Skalierbare B2B-Produktion. Von schnellen Serienläufen bis zu Großaufträgen — strukturiert für flexible Auftragsabwicklung und enge Lieferzeiten.</p>
+
+  <div class="capacity-stats">
+    <div class="cap-stat"><div class="n" data-n="8">0</div><div class="l">Veredelungsverfahren</div></div>
+    <div class="cap-stat"><div class="n" data-n="100">0<span style="color:var(--ink-dim);font-size:.6em">%</span></div><div class="l">Inhouse produziert</div></div>
+    <div class="cap-stat"><div class="n" data-n="1" data-suffix="00%">0</div><div class="l">B2B-Fokussiert</div></div>
+  </div>
+</section>
+
+<!-- AUDIENCE MARQUEE -->
+<section class="audience">
+  <div class="section-head">
+    <div>
+      <div class="num">05 — Zielgruppe</div>
+      <div class="lbl">Für wen wir arbeiten</div>
+    </div>
+    <h2 class="reveal">B2B. <em>Ausschließlich.</em></h2>
+  </div>
+  <p class="audience-intro">Wir produzieren nicht für Einzelbestellungen. <span class="cy-brand">CorporateYou</span> arbeitet ausschließlich mit Firmenkunden, die Wert auf professionelle textile Markenlösungen legen.</p>
+
+  <div class="audience-marquee">
+    <div class="am-line r1">
+      <span>Industrie</span><span>Handwerk</span><span>Bau</span><span>Gastronomie</span><span>Hotellerie</span>
+      <span>Industrie</span><span>Handwerk</span><span>Bau</span><span>Gastronomie</span><span>Hotellerie</span>
+    </div>
+    <div class="am-line r2 alt">
+      <span>Event­agenturen</span><span>Startups</span><span>Marken</span><span>Sport­vereine</span>
+      <span>Event­agenturen</span><span>Startups</span><span>Marken</span><span>Sport­vereine</span>
+    </div>
+    <div class="am-line r3 outline">
+      <span>Merchandising</span><span>Kongresse</span><span>Retail</span><span>Agenturen</span>
+      <span>Merchandising</span><span>Kongresse</span><span>Retail</span><span>Agenturen</span>
+    </div>
+  </div>
+</section>
+
+<!-- USP -->
+<section class="usp">
+  <div class="section-head">
+    <div>
+      <div class="num">06 — Alleinstellungsmerkmale</div>
+      <div class="lbl">Warum <span class="cy-brand">CorporateYou</span></div>
+    </div>
+    <h2 class="reveal"><em>Fünf Gründe,</em><br/>die wir zeigen können.</h2>
+  </div>
+
+  <div class="usp-grid">
+    <div class="usp-card">
+      <div class="num">01</div>
+      <div>
+        <h3>Technologische Vielfalt</h3>
+        <p>Alle gängigen Textilveredelungsverfahren aus einer Hand — Siebdruck, Flex, Digital, Stickerei, DTF, DTG, Sublimation & Latex.</p>
+      </div>
+    </div>
+    <div class="usp-card">
+      <div class="num">02</div>
+      <div>
+        <h3>Inhouse-Stickerei</h3>
+        <p>Robuste, hochwertige Veredelung für professionelle Anwendungen — komplett im eigenen Haus produziert.</p>
+      </div>
+    </div>
+    <div class="usp-card">
+      <div class="num">03</div>
+      <div>
+        <h3>B2B-Spezialisierung</h3>
+        <p>Fokus auf Firmenkunden statt Einzelbestellungen — strukturiert für Serien, Wiederholaufträge und Lohnveredelung.</p>
+      </div>
+    </div>
+    <div class="usp-card">
+      <div class="num">04</div>
+      <div>
+        <h3>Individuelle Lösungen</h3>
+        <p>Alle Farbigkeiten und Druckvarianten für unterschiedliche Einsatzbereiche. Von der Pantone-präzisen Logo-Veredelung bis zum fotorealistischen Allover-Motiv.</p>
+      </div>
+    </div>
+    <div class="usp-card" style="grid-column:span 2">
+      <div class="num">05</div>
+      <div>
+        <h3>Weiterverarbeitung & Logistik integriert</h3>
+        <p style="max-width:700px">Wir integrieren Produktions- und Logistikprozesse unserer Kunden — Etikettierung, Individualverpackung, Kommissionierung, Konfektionierung und Lohnveredelung für Textilhändler und Werbemittelanbieter.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND POSITIONING -->
+<section class="positioning">
+  <div class="capacity-eyebrow">// 07 — Markenpositionierung</div>
+  <div class="pos-big">
+    <div class="line"><span class="word">Industrielle</span> <span class="word italic">Kompetenz</span></div>
+    <div class="line"><span class="word">trifft auf</span>
+      <span class="word circled">modernes
+        <svg viewBox="0 0 300 110" preserveAspectRatio="none"><ellipse cx="150" cy="55" rx="145" ry="50" fill="none" stroke="#ff3b1f" stroke-width="2" stroke-dasharray="3 4"/></svg>
+      </span>
+    </div>
+    <div class="line"><span class="word italic">Branding.</span></div>
+  </div>
+
+  <div class="pos-values">
+    <div class="pos-val">Qualität</div>
+    <div class="pos-val">Individualität</div>
+    <div class="pos-val">Zuverlässigkeit</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="kontakt">
+  <div class="cta-inner">
+    <h2>Lass uns Deine <em>Marke</em> tragbar machen.</h2>
+    <div class="cta-right">
+      <p>Ein kurzes Gespräch, ein Angebot auf Deine Stückzahl — und wir zeigen Dir Muster aus unserer Produktion. Kostenlos & unverbindlich.</p>
+      <a href="mailto:mail@corporateyou.de" class="cta-btn">
+        <span>Angebot anfragen</span>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-main">
+    <div class="footer-brand">
+      <h3><img class="footer-logo" src="https://webtestingenvironment.site/Corporateyou%20white-01.png" alt="CorporateYou"></h3>
+      <p>eine Marke der Polymail GmbH</p>
+      <img src="Polymail.svg" alt="Polymail" class="polymail-logo" style="width: 35%;">
+    </div>
+    <div class="footer-col">
+      <h5>// Leistungen</h5>
+      <ul>
+        <li><a href="#">Siebdruck</a></li>
+        <li><a href="#">Flexdruck</a></li>
+        <li><a href="#">Digitaldruck</a></li>
+        <li><a href="#">Stickerei</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>// Unternehmen</h5>
+      <ul>
+        <li><a href="#story">Story</a></li>
+        <li><a href="#kapazitaet">Kapazität</a></li>
+        <li><a href="#kontakt">Kontakt</a></li>
+        <li><a href="#">Impressum</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>// Kontakt</h5>
+      <ul>
+        <li>Langgewann 7,</li>
+        <li>76467 Bietigheim</li>
+        <li>+49 07245 8749844</li>
+        <li><a href="mailto:mail@corporateyou.de">mail@<span style="color:#ff3b1f">corporateyou</span>.de</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div><span class="dot"></span>Live in BADEN · MMXXVI</div>
+    <div> <span class="cy-brand" style="color:#ff3b1f">© CorporateYou</span> — WEARABLE Solution for Businesses</div>
+  </div>
+</footer>
 
 <script>
-// Using unpkg CDN which handles ORB better
-window.THREE_CDN = 'https://unpkg.com/three@r128/build/three.min.js';
-window.GLTF_LOADER_CDN = 'https://unpkg.com/three@r128/examples/js/loaders/GLTFLoader.js';
+/* ========== LOADER ========== */
+const loader = document.getElementById('loader');
+const count = document.getElementById('loader-count');
+const bar = document.getElementById('loader-bar');
+let n = 0;
+const loaderInterval = setInterval(()=>{
+  n += Math.floor(Math.random()*7)+3;
+  if(n>=100){n=100;clearInterval(loaderInterval);setTimeout(exitLoader,350)}
+  count.textContent = n;
+  bar.style.width = n+'%';
+},55);
 
-// Create a simple scene without external Three.js - using Babylon.js from CDN instead
-// But first, let's load Three.js properly using a script tag
-
-function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load ${url}`));
-    script.crossOrigin = 'anonymous';
-    document.head.appendChild(script);
+function exitLoader(){
+  gsap.to(loader,{
+    yPercent:-100,
+    duration:1.1,
+    ease:'expo.inOut',
+    onComplete:()=>{loader.style.display='none';initAnimations();}
   });
 }
 
-async function init() {
-  try {
-    // Load Three.js first
-    console.log('Loading Three.js...');
-    
-    // Try multiple CDN sources in order
-    const cdnSources = [
-      'https://unpkg.com/three@0.128.0/build/three.min.js',
-      'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
-    ];
+/* ========== LENIS SMOOTH SCROLL ========== */
+const lenis = new Lenis({
+  duration:1.2,
+  easing:(t)=>Math.min(1,1.001-Math.pow(2,-10*t))
+});
+function raf(time){lenis.raf(time);requestAnimationFrame(raf)}
+requestAnimationFrame(raf);
 
-    let threeLoaded = false;
-    for (const cdn of cdnSources) {
-      try {
-        console.log('Trying CDN:', cdn);
-        await loadScript(cdn);
-        threeLoaded = true;
-        console.log('✓ Three.js loaded!');
-        break;
-      } catch (e) {
-        console.log('Failed:', e.message);
+gsap.registerPlugin(ScrollTrigger);
+lenis.on('scroll',ScrollTrigger.update);
+
+/* ========== CUSTOM CURSOR ========== */
+const cursor = document.getElementById('cursor');
+let mx=0,my=0,cx=0,cy=0;
+window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+function animCursor(){
+  cx += (mx-cx)*0.2;
+  cy += (my-cy)*0.2;
+  cursor.style.transform=`translate(${cx}px,${cy}px)`;
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+
+document.querySelectorAll('a,button,.service-card,.usp-card,.tech-row,.cta-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.classList.add('grow'));
+  el.addEventListener('mouseleave',()=>cursor.classList.remove('grow'));
+});
+
+/* ========== CLOCK ========== */
+function updateClock(){
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const s = String(d.getSeconds()).padStart(2,'0');
+  const clock = document.getElementById('clock');
+  if(clock) clock.innerHTML = `<strong>${h}:${m}:${s}</strong> MEZ`;
+}
+updateClock();
+setInterval(updateClock,1000);
+
+/* ========== MAIN ANIMATIONS ========== */
+function initAnimations(){
+  // HERO headline reveal
+  gsap.to('.hero-headline .line > span',{
+    y:0,
+    duration:1.3,
+    stagger:0.1,
+    ease:'expo.out',
+    delay:0.1
+  });
+
+  gsap.from('.hero-tag, .hero-meta > div',{
+    y:20,
+    opacity:0,
+    duration:1,
+    stagger:0.08,
+    delay:0.5,
+    ease:'power3.out'
+  });
+
+  gsap.from('.hero-bottom-item',{
+    y:40,
+    opacity:0,
+    duration:1.1,
+    stagger:0.12,
+    delay:1.0,
+    ease:'power3.out'
+  });
+
+  // HERO counter
+  const counterEl = document.querySelector('.hero-bottom-item .big');
+  if(counterEl){
+    const target = parseInt(counterEl.dataset.count);
+    const obj = {n:0};
+    gsap.to(obj,{
+      n:target,
+      duration:2,
+      delay:1.3,
+      ease:'power2.out',
+      onUpdate:()=>{counterEl.innerHTML = Math.floor(obj.n)+'<sup>+</sup>'}
+    });
+  }
+
+  // Parallax grid bg
+  gsap.to('.hero-grid-bg',{
+    yPercent:30,
+    ease:'none',
+    scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}
+  });
+
+  // Section headings
+  gsap.utils.toArray('.section-head h2').forEach(h=>{
+    gsap.from(h,{
+      y:60,
+      opacity:0,
+      duration:1.2,
+      ease:'expo.out',
+      scrollTrigger:{trigger:h,start:'top 85%'}
+    });
+  });
+
+  // About lead text word-by-word
+  const aboutLead = document.querySelector('.about-lead');
+  if(aboutLead){
+    const words = aboutLead.textContent.trim().split(' ');
+    aboutLead.innerHTML = words.map(w=>`<span class="wrap" style="display:inline-block;overflow:hidden;vertical-align:top"><span class="w${w==='CorporateYou'?' cy-brand':''}" style="display:inline-block;transform:translateY(100%)">${w}&nbsp;</span></span>`).join('');
+    // preserve the <strong> effect by re-matching
+    gsap.to(aboutLead.querySelectorAll('.w'),{
+      y:0,
+      duration:1,
+      stagger:0.03,
+      ease:'expo.out',
+      scrollTrigger:{trigger:aboutLead,start:'top 80%'}
+    });
+  }
+
+  // About body
+  gsap.from('.about-body p',{
+    y:30,
+    opacity:0,
+    duration:0.9,
+    stagger:0.15,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.about-body',start:'top 80%'}
+  });
+
+  // MV cards
+  gsap.from('.mv-card',{
+    y:40,
+    opacity:0,
+    duration:1,
+    stagger:0.15,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.mv-split',start:'top 80%'}
+  });
+
+  // Service cards
+  gsap.from('.service-card',{
+    y:60,
+    opacity:0,
+    duration:0.9,
+    stagger:0.08,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.services-grid',start:'top 80%'}
+  });
+
+  // Tech rows
+  gsap.from('.tech-row',{
+    x:-40,
+    opacity:0,
+    duration:0.8,
+    stagger:0.06,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.tech-list',start:'top 80%'}
+  });
+
+  // Capacity counter (big number)
+  const capNum = document.getElementById('cap-num');
+  if(capNum){
+    const obj = {n:0};
+    gsap.to(obj,{
+      n:400,
+      duration:2.5,
+      ease:'power2.out',
+      scrollTrigger:{trigger:'.capacity-huge',start:'top 80%'},
+      onUpdate:()=>{capNum.textContent = Math.floor(obj.n)}
+    });
+  }
+
+  // Cap stat counters
+  document.querySelectorAll('.cap-stat .n').forEach(el=>{
+    const target = parseInt(el.dataset.n);
+    const suffix = el.dataset.suffix || '';
+    const obj = {n:0};
+    gsap.to(obj,{
+      n:target,
+      duration:2,
+      ease:'power2.out',
+      scrollTrigger:{trigger:el,start:'top 85%'},
+      onUpdate:()=>{
+        if(suffix){
+          el.innerHTML = Math.floor(obj.n) + suffix;
+        } else if(target===100){
+          el.innerHTML = Math.floor(obj.n)+'<span style="color:var(--ink-dim);font-size:.6em">%</span>';
+        } else {
+          el.textContent = Math.floor(obj.n);
+        }
       }
-    }
+    });
+  });
 
-    if (!threeLoaded) {
-      throw new Error('Could not load Three.js from any CDN');
-    }
+  // Capacity sub
+  gsap.from('.capacity-sub',{
+    y:30,
+    opacity:0,
+    duration:1,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.capacity-sub',start:'top 85%'}
+  });
 
-    if (typeof THREE === 'undefined') {
-      throw new Error('THREE object not available');
-    }
+  // Audience intro
+  gsap.from('.audience-intro',{
+    y:30,
+    opacity:0,
+    duration:1,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.audience-intro',start:'top 85%'}
+  });
 
-    // Load GLTFLoader
-    console.log('Loading GLTFLoader...');
-    await loadScript('https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js');
-    
-    if (typeof THREE.GLTFLoader === 'undefined') {
-      throw new Error('GLTFLoader not available');
-    }
+  // USP cards
+  gsap.from('.usp-card',{
+    y:60,
+    opacity:0,
+    duration:1,
+    stagger:0.1,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.usp-grid',start:'top 80%'}
+  });
 
-    console.log('✓ Libraries loaded successfully!');
-    
-    // Now initialize Three.js scene
-    initThreeJS();
-    
-  } catch (error) {
-    console.error('Init error:', error);
-    const errorDiv = document.getElementById('error');
-    errorDiv.innerHTML = `
-      <h2>❌ Error Loading 3D Model</h2>
-      <p>${error.message}</p>
-      <p style="font-size: 12px; margin-top: 20px;">Make sure iphone.glb is in the same directory as this HTML file.</p>
-    `;
-    errorDiv.style.display = 'block';
-    document.getElementById('loading').style.display = 'none';
+  // Positioning words
+  gsap.from('.pos-big .word',{
+    y:100,
+    opacity:0,
+    duration:1,
+    stagger:0.08,
+    ease:'expo.out',
+    scrollTrigger:{trigger:'.pos-big',start:'top 75%'}
+  });
+  gsap.from('.pos-val',{
+    y:40,
+    opacity:0,
+    duration:0.9,
+    stagger:0.15,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.pos-values',start:'top 85%'}
+  });
+  // Circle stroke animation on position
+  const ellipse = document.querySelector('.pos-big .circled ellipse');
+  if(ellipse){
+    const len = ellipse.getTotalLength ? ellipse.getTotalLength() : 500;
+    gsap.set(ellipse,{strokeDasharray:len,strokeDashoffset:len});
+    gsap.to(ellipse,{
+      strokeDashoffset:0,
+      duration:2,
+      ease:'power2.out',
+      scrollTrigger:{trigger:'.pos-big',start:'top 70%'}
+    });
+  }
+
+  // CTA
+  gsap.from('.cta h2',{
+    y:60,
+    opacity:0,
+    duration:1.2,
+    ease:'expo.out',
+    scrollTrigger:{trigger:'.cta',start:'top 80%'}
+  });
+  gsap.from('.cta-right > *',{
+    y:30,
+    opacity:0,
+    duration:0.9,
+    stagger:0.12,
+    ease:'power3.out',
+    scrollTrigger:{trigger:'.cta-right',start:'top 80%'}
+  });
+
+  // CTA background text marquee
+  gsap.to('.cta::before',{});  // (placeholder — real animation via CSS keyframes if needed)
+
+  // Stitch path (about visual)
+  const stitchPath = document.getElementById('stitch-path');
+  if(stitchPath){
+    const len = stitchPath.getTotalLength();
+    gsap.set(stitchPath,{strokeDasharray:'8 6',strokeDashoffset:len});
+    gsap.to(stitchPath,{
+      strokeDashoffset:0,
+      duration:3,
+      ease:'none',
+      scrollTrigger:{trigger:'.about-visual',start:'top 80%'}
+    });
   }
 }
 
-function initThreeJS() {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
-  scene.fog = null;
+/* ========== NAV SCROLL STATE ========== */
+const navEl = document.querySelector('.nav');
+function updateNavState(){
+  if(window.scrollY > 60){
+    navEl.classList.add('scrolled');
+  } else {
+    navEl.classList.remove('scrolled');
+  }
+}
+window.addEventListener('scroll',updateNavState,{passive:true});
+updateNavState();
 
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.01,
-    1000
-  );
-  camera.position.set(0, 0.5, 2);
-  camera.lookAt(0, 0, 0);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0xffffff, 1.0);
-  renderer.shadowMap.enabled = true;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  document.body.appendChild(renderer.domElement);
-
-  // Better lighting setup
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(ambientLight);
-
-  const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
-  directionalLight1.position.set(5, 10, 7);
-  directionalLight1.castShadow = true;
-  scene.add(directionalLight1);
-
-  const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
-  directionalLight2.position.set(-5, 5, -5);
-  scene.add(directionalLight2);
-
-  // Load model
-  const loader = new THREE.GLTFLoader();
-  let model = null;
-  
-  loader.load('iphone.glb', 
-    (gltf) => {
-      model = gltf.scene;
-      model.scale.set(1, 1, 1);
-      
-      // Center and position model
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      
-      model.position.x -= center.x;
-      model.position.y -= center.y;
-      model.position.z -= center.z;
-      
-      // Scale to fit view
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 1.2 / maxDim;
-      model.scale.multiplyScalar(scale);
-      
-      scene.add(model);
-      
-      document.getElementById('loading').style.display = 'none';
-      console.log('✓ Model loaded successfully!');
-      
-      // Animation loop
-      function animate() {
-        requestAnimationFrame(animate);
-        if (model) {
-          model.rotation.y += 0.005;
-        }
-        renderer.render(scene, camera);
-      }
-      animate();
-    },
-    (progress) => {
-      const percent = (progress.loaded / progress.total) * 100;
-      console.log(`Loading: ${percent.toFixed(0)}%`);
-    },
-    (error) => {
-      console.error('Model loading error:', error);
-      const errorDiv = document.getElementById('error');
-      errorDiv.innerHTML = `
-        <h2>❌ Failed to Load iPhone Model</h2>
-        <p>Error: ${error.message}</p>
-        <p style="font-size: 12px; margin-top: 20px;">Make sure iphone.glb is in: c:\\Users\\Hp\\Desktop\\corporate you\\</p>
-      `;
-      errorDiv.style.display = 'block';
-      document.getElementById('loading').style.display = 'none';
+/* ========== NAV SMOOTH SCROLL ========== */
+document.querySelectorAll('a[href^="#"]').forEach(link=>{
+  link.addEventListener('click',e=>{
+    const target = document.querySelector(link.getAttribute('href'));
+    if(target){
+      e.preventDefault();
+      lenis.scrollTo(target,{offset:-40,duration:1.5});
     }
-  );
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
   });
-}
-
-// Start loading when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+});
 </script>
 
 </body>
