@@ -94,11 +94,23 @@ img{max-width:100%;display:block}
 .nav-cta .arr{display:inline-block;transition:transform .35s ease}
 .nav-cta:hover .arr{transform:translateX(4px)}
 @media(max-width:900px){
-  .nav{top:12px;width:calc(100% - 20px);padding:10px 10px 10px 18px}
-  .nav.scrolled{top:8px}
+  .nav{top:12px;width:calc(100% - 20px);padding:8px 8px 8px 16px;gap:10px}
+  .nav.scrolled{top:8px;padding:7px 7px 7px 14px}
   .nav-menu{display:none}
-  .nav-logo{font-size:15px}
-  .nav-cta{padding:10px 16px;font-size:10.5px;letter-spacing:.15em}
+  .nav-logo{font-size:15px;min-width:0;flex:0 1 auto;overflow:hidden}
+  .nav-logo img{height:24px !important;width:auto !important;max-width:140px;object-fit:contain}
+  .nav-cta{padding:9px 14px;font-size:10px;letter-spacing:.12em;flex-shrink:0}
+}
+@media(max-width:480px){
+  .nav{padding:6px 6px 6px 12px;gap:8px}
+  .nav.scrolled{padding:6px 6px 6px 12px}
+  .nav-logo img{height:20px !important;max-width:110px}
+  .nav-cta{padding:8px 12px;font-size:9.5px;letter-spacing:.08em;gap:5px}
+  .nav-cta .arr{font-size:11px}
+}
+@media(max-width:360px){
+  .nav-cta span:not(.arr){display:none}
+  .nav-cta{padding:8px 10px}
 }
 
 /* ============ HERO ============ */
