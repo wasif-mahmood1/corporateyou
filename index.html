@@ -154,6 +154,8 @@ img{max-width:100%;display:block}
   .hero-headline .hero-brand-word{font-size:.55em;-webkit-text-stroke:1.5px var(--accent);letter-spacing:0}
   .hero-headline .italic{letter-spacing:-.02em}
   .hero-scroll{display:none}
+  .hero-tag{gap:8px;font-size:10px;letter-spacing:.14em;white-space:nowrap}
+  .hero-tag .bar{width:24px}
 }
 @media(max-width:480px){
   .hero{padding:84px 16px 32px}
@@ -162,6 +164,8 @@ img{max-width:100%;display:block}
   .hero-bottom-item .big{font-size:40px}
   .hero-bottom-item p{font-size:16px}
   .hero-meta{font-size:10px;letter-spacing:.12em}
+  .hero-tag{font-size:9px;letter-spacing:.1em;gap:6px}
+  .hero-tag .bar{width:16px}
 }
 
 /* ============ MARQUEE TICKER ============ */
@@ -170,6 +174,14 @@ img{max-width:100%;display:block}
 .ticker span{font-family:"Archivo Black",sans-serif;font-size:clamp(28px,4vw,56px);text-transform:uppercase;letter-spacing:-.02em;display:inline-flex;align-items:center;gap:60px}
 .ticker span::after{content:"✕";color:#000;font-size:.7em;display:inline-block;transform:translateY(-2px)}
 @keyframes tick{to{transform:translateX(-50%)}}
+@media(max-width:900px){
+  .ticker-track{animation-duration:14s;gap:40px}
+  .ticker span{gap:40px}
+}
+@media(max-width:480px){
+  .ticker-track{animation-duration:10s;gap:30px}
+  .ticker span{gap:30px}
+}
 
 /* ============ SECTION DEFAULT ============ */
 section{position:relative;padding:120px 40px}
